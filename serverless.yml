@@ -73,7 +73,7 @@ resources:
       Type: AWS::SNS::Topic
       Properties:
         DisplayName: ${env:environment}-covid-upload-complete
-        TopicName: CovidUploadComplete
+        TopicName: ${env:environment}-covid-upload-complete
     Covid19Bucket:
         Type: 'AWS::S3::Bucket'
         Properties:

@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: '3.7.7'
       - name: Install dependencies for etl lambda
-        run: 'pip install -r etl/lambda_functions/covid-19-lambda-function/requirements.txt -t .'
+        run: 'pip install -r etl/lambda_functions/covid-19-etl-lambda-function/requirements.txt -t .'
       - name: Installs Serverless plugins and Deploy
         uses: serverless/github-action@v1.53.0
         with:

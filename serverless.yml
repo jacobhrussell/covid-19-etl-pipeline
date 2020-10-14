@@ -1,0 +1,107 @@
+service: covid-19-etl
+
+provider:
+  name: aws
+  runtime: python3.7
+  iamRoleStatements:
+  - Effect: "Allow"
+    Action:
+      - dynamodb:Query
+      - dynamodb:Scan
+      - dynamodb:GetItem
+      - dynamodb:PutItem
+      - dynamodb:UpdateItem
+    Resource:
+      Fn::GetAtt:
+        - Covid19Table
+        - Arn
+  - Effect: "Allow"
+    Action:
+      - 'SNS:publish'
+    Resource:
+      Ref: CovidUploadComplete
+
+
+functions:
+  covid-19-etl:
+    name: ${env:environment}-covid-19-etl-lambda
+    handler: etl/lambda_functions/covid-19-lambda-function/lambda_function.lambda_handler
+    timeout: 30
+    package:
+      include:
+        - etl/data_accessorsr/**
+        - etl/helpers/**
+    events:
+      - schedule: rate(1 day)
+    environment:
+      Environment: ${env:environment}
+      CovidUploadComplete: 
+        Ref: CovidUploadComplete
+  covid-19-s3:
+    name: ${env:environment}-covid-19-s3-lambda
+    handler: etl/lambda_functions/covid-19-s3-lambda-function/lambda_function.lambda_handler
+    timeout: 30
+    package:
+      include:
+        - etl/data_accessorsr/**
+        - etl/helpers/**
+    events:
+      - {Ref: CovidUploadComplete}
+    environment:
+      Environment: ${env:environment}
+
+resources:
+  Resources:
+    Covid19Table:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: 
+          Fn::Join:
+            - ''
+            - - ${env:environment}
+              - '-covid-19-table'
+        AttributeDefinitions:
+          - AttributeName: 'myDate'
+            AttributeType: 'S'
+        KeySchema:
+          - AttributeName: 'myDate'
+            KeyType: 'HASH'
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+    CovidUploadComplete:
+      Type: AWS::SNS::Topic
+      Properties:
+        DisplayName: ${env:environment}-covid-upload-complete
+        TopicName: CovidUploadComplete
+    Covid19Bucket:
+        Type: 'AWS::S3::Bucket'
+        Properties:
+          AccessControl: Private
+          BucketName: ${env:environment}-covid-19-bucket
+          PublicAccessBlockConfiguration:
+              BlockPublicAcls: True
+              BlockPublicPolicy: True
+              IgnorePublicAcls: True
+              RestrictPublicBuckets: True
+    S3BucketPolicy:
+      Type: 'AWS::S3::BucketPolicy'
+      Properties:
+        Bucket: 
+          Ref: Covid19Bucket
+        PolicyDocument:
+          Statement:
+            - Effect: Allow
+              Action:
+                - 's3:GetObject'
+                - 's3:PutObject'
+                - 's3:DeleteObject'
+                - 's3:GetBucketLocation'
+                - 's3:ListBucket'
+                - 's3:PutBucketNotification'
+              Principal:
+                AWS: 
+                  - 'arn:aws:iam::728486195745:role/covid-19-etl-dev-us-east-1-lambdaRole'
+              Resource:
+                - arn:aws:s3:::${env:environment}-covid-19-bucket
+                - arn:aws:s3:::${env:environment}-covid-19-bucket/*

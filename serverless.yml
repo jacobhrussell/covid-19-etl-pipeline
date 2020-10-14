@@ -37,7 +37,7 @@ functions:
       Environment: ${env:environment}
       CovidUploadComplete: 
         Ref: CovidUploadComplete
-  covid-19-s3:
+  covid-19-s3-upload:
     name: ${env:environment}-covid-19-s3-lambda
     handler: etl/lambda_functions/covid-19-s3-upload-lambda-function/lambda_function.lambda_handler
     timeout: 30
@@ -46,7 +46,7 @@ functions:
         - etl/data_accessorsr/**
         - etl/helpers/**
     events:
-      - {Ref: CovidUploadComplete}
+      - Ref: CovidUploadComplete
     environment:
       Environment: ${env:environment}
 

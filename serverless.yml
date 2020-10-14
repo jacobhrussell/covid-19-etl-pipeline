@@ -21,6 +21,7 @@ provider:
     Resource:
       Ref: CovidUploadComplete
 
+
 functions:
   covid-19-etl:
     name: ${env:environment}-covid-19-etl-lambda
@@ -48,7 +49,7 @@ functions:
       - {Ref: CovidUploadComplete}
     environment:
       Environment: ${env:environment}
-      
+
 resources:
   Resources:
     Covid19Table:

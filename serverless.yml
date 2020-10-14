@@ -104,7 +104,7 @@ resources:
                   - Fn::Join:
                     - ''
                     - - 'arn:aws:iam::'
-                      - Fn::Sub: ${AWS::AccountId}
+                      - Ref: AWS::AccountId
                       - ':role/covid-19-etl-'
                       - ${env:environment}
                       - '-us-east-1-lambdaRole'

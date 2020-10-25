@@ -108,7 +108,6 @@ resources:
                       - ':role/covid-19-etl-'
                       - ${env:environment}
                       - '-us-east-1-lambdaRole'
-                  #- 'arn:aws:iam::728486195745:role/covid-19-etl-dev-us-east-1-lambdaRole'
               Resource:
                 - arn:aws:s3:::${env:environment}-covid-19-bucket
                 - arn:aws:s3:::${env:environment}-covid-19-bucket/*
